@@ -1,6 +1,12 @@
+import os
 import asyncio
 import websockets
+from dotenv import load_dotenv
 from actualAI import get_groq_response
+
+# Load environment variables from .env file
+load_dotenv()
+
 # Allowed origins
 ALLOWED_ORIGINS = {"http://127.0.0.1:5500", "https://nextgensell.com"}
 
@@ -15,13 +21,14 @@ async def handler(websocket, path):
     try:
         async for message in websocket:
             print(f"Received message: {message}")
-            await websocket.send(get_groq_response(message))
+            response = get_groq_response(message)
+            await websocket.send(response)
     except websockets.exceptions.ConnectionClosed as e:
         print(f"Connection closed: {e}")
 
-start_server = websockets.serve(handler, "localhost", 8765)
+start_server = websockets.serve(handler, "0.0.0.0", 8765)
 
 # Start the server
 asyncio.get_event_loop().run_until_complete(start_server)
-print("WebSocket server started on ws://localhost:8765")
+print("WebSocket server started on ws://0.0.0.0:8765")
 asyncio.get_event_loop().run_forever()
