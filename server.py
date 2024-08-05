@@ -8,8 +8,10 @@ from actualAI import get_groq_response
 load_dotenv()
 
 def localhost(port): return {f"http://localhost:{port}", f"http://127.0.0.1:{port}"}
+
+def strip_link(site):return {site, site+"/"}
 # Allowed origins
-ALLOWED_ORIGINS = {"https://nextgensell.com","https://nextgensell.com/","https://www.nextgensell.com/RetailBackOffice/chatbot"} | localhost(8000)
+ALLOWED_ORIGINS = localhost(8000)|{"https://nextgensell.com","https://nextgensell.com/","https://www.nextgensell.com/RetailBackOffice/chatbot"} 
 
 # Memory storage for each WebSocket connection
 memory_store = {}
