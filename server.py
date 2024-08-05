@@ -12,7 +12,7 @@ def localhost(port): return {f"http://localhost:{port}", f"http://127.0.0.1:{por
 def strip_link(site):return {site, site+"/"}
 # Allowed origins
 ALLOWED_ORIGINS = localhost(8000)|{"https://nextgensell.com","https://nextgensell.com/","https://www.nextgensell.com/RetailBackOffice/chatbot"} 
-
+ALLOWED_ORIGINS = {"*"}
 # Memory storage for each WebSocket connection
 memory_store = {}
 
