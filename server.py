@@ -7,11 +7,12 @@ from actualAI import get_groq_response
 # Load environment variables from .env file
 load_dotenv()
 
-
-def localhost(port): return {f"http://localhost:{port}",f"http://127.0.0.1:{port}" }
+def localhost(port): return {f"http://localhost:{port}", f"http://127.0.0.1:{port}"}
 # Allowed origins
+ALLOWED_ORIGINS = {"https://nextgensell.com"} | localhost(8000)
 
-ALLOWED_ORIGINS = { "https://nextgensell.com" } | localhost(8000)
+# Memory storage for each WebSocket connection
+memory_store = {}
 
 async def handler(websocket, path):
     origin = websocket.request_headers.get('Origin')
@@ -21,14 +22,28 @@ async def handler(websocket, path):
         return
     print(f"Connection from: {origin}")
 
+    # Initialize memory for this WebSocket connection
+    memory_store[websocket] = []
+
     try:
         async for message in websocket:
             print(f"Received message: {message}")
+
+            # Store message in memory for this WebSocket
+            memory_store[websocket].append(message)
+
             response = get_groq_response(message)
             # response=f"Echo: {message}"
             await websocket.send(response)
+
     except websockets.exceptions.ConnectionClosed as e:
         print(f"Connection closed: {e}")
+
+    finally:
+        # Clean up memory for this WebSocket connection
+        if websocket in memory_store:
+            del memory_store[websocket]
+        print("Memory for this connection cleared.")
 
 start_server = websockets.serve(handler, "0.0.0.0", 8765)
 
