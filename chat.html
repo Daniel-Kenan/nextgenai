@@ -55,8 +55,8 @@
 
     <script>
         const isLocalConnection = false
-        const connection = isLocalConnection ? 'localhost:8765' : "nextgenai-production.up.railway.app"
-        const ws = new WebSocket("ws://"+connection);
+        const connection = isLocalConnection ? 'ws://localhost:8765' : "wss://nextgenai-production.up.railway.app"
+        const ws = new WebSocket(connection);
 
         ws.onopen = () => {
             console.log('Connected to WebSocket server');

@@ -7,8 +7,11 @@ from actualAI import get_groq_response
 # Load environment variables from .env file
 load_dotenv()
 
+
+def localhost(port): return {f"http://localhost:{port}",f"http://127.0.0.1:{port}" }
 # Allowed origins
-ALLOWED_ORIGINS = {"http://127.0.0.1:5500", "https://nextgensell.com"}
+
+ALLOWED_ORIGINS = { "https://nextgensell.com" } | localhost(8000)
 
 async def handler(websocket, path):
     origin = websocket.request_headers.get('Origin')
@@ -22,6 +25,7 @@ async def handler(websocket, path):
         async for message in websocket:
             print(f"Received message: {message}")
             response = get_groq_response(message)
+            # response=f"Echo: {message}"
             await websocket.send(response)
     except websockets.exceptions.ConnectionClosed as e:
         print(f"Connection closed: {e}")
