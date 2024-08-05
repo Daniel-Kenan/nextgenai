@@ -9,7 +9,7 @@ load_dotenv()
 
 def localhost(port): return {f"http://localhost:{port}", f"http://127.0.0.1:{port}"}
 # Allowed origins
-ALLOWED_ORIGINS = {"https://nextgensell.com","https://nextgensell.com/"} | localhost(8000)
+ALLOWED_ORIGINS = {"https://nextgensell.com","https://nextgensell.com/","https://www.nextgensell.com/RetailBackOffice/chatbot"} | localhost(8000)
 
 # Memory storage for each WebSocket connection
 memory_store = {}
