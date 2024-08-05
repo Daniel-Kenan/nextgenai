@@ -2,7 +2,6 @@ import os
 import asyncio
 import websockets
 import sqlite3
-from aiohttp import web
 from dotenv import load_dotenv
 from actualAI import get_groq_response
 
@@ -11,7 +10,7 @@ load_dotenv()
 
 def localhost(port): return {f"http://localhost:{port}", f"http://127.0.0.1:{port}"}
 # Allowed origins
-ALLOWED_ORIGINS = {"https://nextgensell.com"} | localhost(8000)
+ALLOWED_ORIGINS = {"https://nextgensell.com"} | localhost(5500)
 
 # SQLite3 database file
 DB_FILE = 'conversations.db'
@@ -33,7 +32,7 @@ def store_message(websocket_id, message):
     conn.commit()
     conn.close()
 
-async def websocket_handler(websocket, path):
+async def handler(websocket, path):
     origin = websocket.request_headers.get('Origin')
     if origin not in ALLOWED_ORIGINS:
         await websocket.close(code=1008, reason='Forbidden origin')
@@ -68,23 +67,9 @@ async def websocket_handler(websocket, path):
         # Clean up memory for this WebSocket connection
         print("Memory for this connection cleared.")
 
-async def http_handler(request):
-    return web.Response(text="Hello, World!")
+start_server = websockets.serve(handler, "0.0.0.0", 8765)
 
-async def init_app():
-    app = web.Application()
-    app.router.add_get('/', http_handler)
-
-    # WebSocket server setup
-    ws_server = await websockets.serve(websocket_handler, "0.0.0.0", 8765)
-
-    return app, ws_server
-
-def main():
-    app, ws_server = asyncio.run(init_app())
-    print("WebSocket server started on ws://0.0.0.0:8765")
-    print("HTTP server started on http://0.0.0.0:8080")
-    web.run_app(app, port=8080)
-
-if __name__ == "__main__":
-    main()
+# Start the server
+asyncio.get_event_loop().run_until_complete(start_server)
+print("WebSocket server started on ws://0.0.0.0:8765")
+asyncio.get_event_loop().run_forever()

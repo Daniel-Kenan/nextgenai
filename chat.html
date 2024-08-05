@@ -54,12 +54,13 @@
     </div>
 
     <script>
-        const isLocalConnection = false
-        const connection = isLocalConnection ? 'ws://localhost:8765' : "wss://nextgenai-production.up.railway.app"
+        const isLocalConnection = true; // Change to `false` when testing remotely
+        const connection = isLocalConnection ? 'ws://localhost:8765' : "wss://nextgenai-production.up.railway.app";
         const ws = new WebSocket(connection);
 
         ws.onopen = () => {
             console.log('Connected to WebSocket server');
+            alert('Connected to WebSocket server');
         };
 
         ws.onmessage = (event) => {
@@ -71,10 +72,12 @@
 
         ws.onclose = () => {
             console.log('Disconnected from WebSocket server');
+            alert('Disconnected from WebSocket server');
         };
 
         ws.onerror = (error) => {
             console.error('WebSocket error:', error);
+            alert('WebSocket error: ' + error.message);
         };
 
         document.getElementById('sendButton').addEventListener('click', () => {
