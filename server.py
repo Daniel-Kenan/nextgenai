@@ -32,8 +32,8 @@ async def handler(websocket, path):
             # Store message in memory for this WebSocket
             memory_store[websocket].append(message)
 
-            response = get_groq_response(message)
-            # response=f"Echo: {message}"
+            # Use the memory context when getting the response
+            response = get_groq_response(message, memory_store[websocket])
             await websocket.send(response)
 
     except websockets.exceptions.ConnectionClosed as e:
@@ -44,6 +44,7 @@ async def handler(websocket, path):
         if websocket in memory_store:
             del memory_store[websocket]
         print("Memory for this connection cleared.")
+
 
 start_server = websockets.serve(handler, "0.0.0.0", 8765)
 
