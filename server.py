@@ -1,7 +1,6 @@
 import os
 import asyncio
 import websockets
-import sqlite3
 from dotenv import load_dotenv
 from actualAI import get_groq_response
 
@@ -10,27 +9,10 @@ load_dotenv()
 
 def localhost(port): return {f"http://localhost:{port}", f"http://127.0.0.1:{port}"}
 # Allowed origins
-ALLOWED_ORIGINS = {"https://nextgensell.com"} | localhost(5500)
+ALLOWED_ORIGINS = {"https://nextgensell.com"} | localhost(8000)
 
-# SQLite3 database file
-DB_FILE = 'conversations.db'
-
-# Function to get conversation history from the database
-def get_conversation_history(websocket_id):
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute('SELECT message FROM messages WHERE websocket_id = ? ORDER BY timestamp', (websocket_id,))
-    messages = [row[0] for row in c.fetchall()]
-    conn.close()
-    return messages
-
-# Function to store a message in the database
-def store_message(websocket_id, message):
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute('INSERT INTO messages (websocket_id, message) VALUES (?, ?)', (websocket_id, message))
-    conn.commit()
-    conn.close()
+# Memory storage for each WebSocket connection
+memory_store = {}
 
 async def handler(websocket, path):
     origin = websocket.request_headers.get('Origin')
@@ -40,32 +22,29 @@ async def handler(websocket, path):
         return
     print(f"Connection from: {origin}")
 
-    # Use a unique identifier for each WebSocket connection
-    websocket_id = str(id(websocket))
+    # Initialize memory for this WebSocket connection
+    memory_store[websocket] = []
 
     try:
         async for message in websocket:
             print(f"Received message: {message}")
 
-            # Store message in the database
-            store_message(websocket_id, message)
+            # Store message in memory for this WebSocket
+            memory_store[websocket].append(message)
 
-            # Retrieve the conversation history for this WebSocket
-            conversation_history = get_conversation_history(websocket_id)
-
-            # Get response using the conversation history
-            response = get_groq_response(message, conversation_history)
+            # Use the memory context when getting the response
+            response = get_groq_response(message, memory_store[websocket])
             await websocket.send(response)
-
-            # Store the response in the database
-            store_message(websocket_id, response)
 
     except websockets.exceptions.ConnectionClosed as e:
         print(f"Connection closed: {e}")
 
     finally:
         # Clean up memory for this WebSocket connection
+        if websocket in memory_store:
+            del memory_store[websocket]
         print("Memory for this connection cleared.")
+
 
 start_server = websockets.serve(handler, "0.0.0.0", 8765)
 
