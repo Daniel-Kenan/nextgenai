@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Limits Management</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Manage Request Limits</h1>
+    <form id="update-form">
+        <label for="max_requests">Set Maximum Requests:</label>
+        <input type="number" id="max_requests" name="max_requests" value="{{ max_requests }}" required>
+        <button type="submit">Update</button>
+    </form>
+
+    <h2>Current Request Counts</h2>
+    <ul id="request-counts">
+        {% for token, count in request_counts.items() %}
+        <li>{{ token }}: {{ count }}</li>
+        {% endfor %}
+    </ul>
+
+    <script>
+        $(document).ready(function() {
+            $('#update-form').on('submit', function(e) {
+                e.preventDefault();
+                const newMaxRequests = $('#max_requests').val();
+                $.post('/update_max_requests', { max_requests: newMaxRequests }, function(data) {
+                    if (data.success) {
+                        alert('Max requests updated to ' + data.max_requests);
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

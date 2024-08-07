@@ -17,11 +17,15 @@ request_counts = {}
 
 # Constants
 ACCESS_TOKEN = "222001313@ump.ac.za"
-MAX_REQUESTS = 20
+MAX_REQUESTS = 0
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/manage')
+def manage():
+    return render_template('manage.html', max_requests=MAX_REQUESTS, request_counts=request_counts)
 
 @app.route('/ask', methods=['GET'])
 def handle_ask():
@@ -43,6 +47,16 @@ def handle_ask():
     response = get_groq_response(f"{question} , translate only dont explain. be brief, just write the translated words; dont answer the question, just respond", [])
 
     return jsonify({"response": response})
+
+@app.route('/update_max_requests', methods=['POST'])
+def update_max_requests():
+    global MAX_REQUESTS
+    new_max = request.form.get('max_requests')
+    try:
+        MAX_REQUESTS = int(new_max)
+        return jsonify({"success": True, "max_requests": MAX_REQUESTS})
+    except ValueError:
+        return jsonify({"error": "Invalid input"}), 400
 
 @socketio.on('connect')
 def handle_connect():
@@ -67,4 +81,4 @@ def handle_message(message):
 
 if __name__ == '__main__':
     print("WebSocket server started")
-    socketio.run(app, host='0.0.0.0', port=8765,allow_unsafe_werkzeug=True)
+    socketio.run(app, host='0.0.0.0', port=8765, allow_unsafe_werkzeug=True)
