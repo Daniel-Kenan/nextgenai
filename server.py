@@ -67,4 +67,4 @@ def handle_message(message):
 
 if __name__ == '__main__':
     print("WebSocket server started")
-    socketio.run(app, host='0.0.0.0', port=8765)
+    socketio.run(app, host='0.0.0.0', port=8765,allow_unsafe_werkzeug=True)
