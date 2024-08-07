@@ -40,7 +40,7 @@ def handle_ask():
     request_counts[token] += 1
 
     # Generate the response using the actualAI function
-    response = get_groq_response(question, [])
+    response = get_groq_response(f"{question} , translate only dont explain. be brief", [])
 
     return jsonify({"response": response})
 
