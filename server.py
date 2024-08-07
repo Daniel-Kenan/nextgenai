@@ -17,7 +17,7 @@ request_counts = {}
 
 # Constants
 ACCESS_TOKEN = "222001313@ump.ac.za"
-MAX_REQUESTS = 3
+MAX_REQUESTS = 20
 
 @app.route('/')
 def index():
