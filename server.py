@@ -40,7 +40,7 @@ def handle_ask():
 
     if request_counts[token] >= MAX_REQUESTS:
         return jsonify({"error": "Request limit exceeded"}), 429
-
+  
     request_counts[token] += 1
 
     # Generate the response using the actualAI function
